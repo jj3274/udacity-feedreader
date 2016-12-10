@@ -34,7 +34,6 @@ $(function() {
          it('feed has a URL defined and that the URL is not empty', function() {
            expect(allFeeds).toBeDefined();
            allFeeds.forEach(function(feed) {
-             expect(feed).toBeDefined();
              expect(feed.url).toBeDefined();
              expect(feed.url.length).not.toBe(0);
            })
@@ -47,7 +46,6 @@ $(function() {
          it('feed has a name defined and that the name is not empty', function() {
            expect(allFeeds).toBeDefined();
            allFeeds.forEach(function(feed) {
-             expect(feed).toBeDefined();
              expect(feed.name).toBeDefined();
              expect(feed.name.length).not.toBe(0);
            })
@@ -64,7 +62,6 @@ $(function() {
          * hiding/showing of the menu element.
          */
          it('the menu element is hidden by default', function() {
-           expect($('body')).toBeDefined();
            expect($('body').hasClass('menu-hidden')).toBe(true);
          });
 
@@ -74,12 +71,11 @@ $(function() {
           * clicked and does it hide when clicked again.
           */
           it('the menu changes visibility when the menu icon is clicked', function() {
-            var menu_hidden = $('body').hasClass('menu-hidden');
             menuIcon = $('.menu-icon-link');
             menuIcon.click();
-            expect($('body').hasClass('menu-hidden')).not.toBe(menu_hidden);
+            expect($('body').hasClass('menu-hidden')).toBe(false);
             menuIcon.click();
-            expect($('body').hasClass('menu-hidden')).toBe(menu_hidden);
+            expect($('body').hasClass('menu-hidden')).toBe(true);
           });
     });
 
@@ -93,23 +89,17 @@ $(function() {
          * the use of Jasmine's beforeEach and asynchronous done() function.
          */
          beforeEach(function(done) {
-           spyOn(window, 'loadFeed').and.callThrough();
-           setTimeout(function() {
-             done();
-           }, 1);
-         });
-
-         it('loadFeed is called', function() {
-           expect(window.loadFeed).toHaveBeenCalled();
+          //  spyOn(window, 'loadFeed').and.callThrough();
+           loadFeed(0, function() {
+               done();
+           } );
          });
 
          it('loadFeed loads at least a single entry element', function(done) {
-           setTimeout(function() {
-             var entryList = $('.feed').find('.entry');
-             expect(entryList).toBeDefined();
-             expect(entryList.length).not.toBe(0);
-             done();
-           }, 1000);
+           var entryList = $('.feed').find('.entry');
+           console.log('entryList length = ' + entryList.length);
+           expect(entryList.length).not.toBe(0);
+           done();
          });
     });
 
@@ -121,32 +111,34 @@ $(function() {
          */
     describe('New Feed Selection', function() {
       var beforeFirstEntryLink, beforeLastEntryLink;
-      beforeEach(function() {
-        var entryLinkList = $('.feed > .entry-link');
-        expect(entryLinkList).toBeDefined();
-        expect(entryLinkList.length).not.toBe(0);
-        beforeFirstEntryLink = entryLinkList.first().attr('href');
-        beforeLastEntryLink = entryLinkList.last().attr('href');
-        spyOn(window, 'loadFeed').and.callThrough();
-        loadFeed(1);
-      });
-
-      it('loadFeed function is called for a new feed load', function() {
-        expect(window.loadFeed).toHaveBeenCalledWith(1);
+      beforeEach(function(done) {
+        // spyOn(window, 'loadFeed').and.callThrough();
+        loadFeed(1, function() {
+          var entryLinkList = $('.feed > .entry-link');
+          expect(entryLinkList).toBeDefined();
+          expect(entryLinkList.length).not.toBe(0);
+          beforeFirstEntryLink = entryLinkList.first().attr('href');
+          beforeLastEntryLink = entryLinkList.last().attr('href');
+          done();
+        } );
       });
 
       it('new feed is loaded by the loadFeed function', function(done) {
-        setTimeout(function() {
+        loadFeed(2, function() {
           var entryLinkList = $('.feed > .entry-link');
           expect(entryLinkList).toBeDefined();
           expect(entryLinkList.length).not.toBe(0);
 
           afterFirstEntryLink = entryLinkList.first().attr('href');
           afterLastEntryLink = entryLinkList.last().attr('href');
+
+          console.log('before1: ' + beforeFirstEntryLink + ', after2: ' + afterFirstEntryLink);
+          console.log('before2: ' + beforeLastEntryLink + ', after2: ' + afterLastEntryLink);
+
           expect(afterFirstEntryLink).not.toBe(beforeFirstEntryLink);
           expect(afterLastEntryLink).not.toBe(beforeLastEntryLink);
           done();
-        }, 1000);
+        } );
       });
 
     });
